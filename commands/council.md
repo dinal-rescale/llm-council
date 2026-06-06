@@ -32,15 +32,34 @@ The user's decision to analyze:
 Produce your analysis in the format specified in your instructions. Do not add preamble.
 ```
 
-### Step 2 — Anonymize
+### Step 2 — Normalize, then anonymize
 
-Collect the 5 returned analyses. Relabel them as **Advisor A, B, C, D, E** in a randomized order (do not preserve the dispatch order — shuffle). Keep a private mapping in your head; do NOT reveal which advisor is which until after the chairman's verdict.
+Collect the 5 returned analyses. **Anonymization is only real if format does not leak identity.** Each advisor writes under a role-branded heading (`## Contrarian verdict`, `## First-principles verdict`, etc.) and role-specific section labels ("Fatal flaws", "True constraints", "week 1", "dumb questions", "Overlooked upside"). A peer reviewer would instantly recognize the author from these. You MUST strip them.
 
-Display the 5 anonymized outputs to the user under a heading `## Anonymized advisor outputs`.
+For each analysis, rewrite it into this single neutral template — identical structure for all five, content preserved:
+
+```
+**Verdict in one line:** <the advisor's headline take, rephrased without role-specific vocabulary>
+
+**Key points:**
+- <point>
+- <point>
+
+**Main risk or gap it raises:**
+<the most important concern or opportunity this analysis surfaces>
+
+**Confidence:** <low / medium / high>
+```
+
+When normalizing, neutralize tells: drop the branded heading, generalize labels (e.g. "Fatal flaws" → "Key points", "week 1 action" → a key point), and lightly rephrase signature phrasing so no analysis is identifiable by vocabulary alone. Do NOT change the substance, the conclusion, or the confidence level.
+
+Then relabel the five normalized analyses as **Advisor A, B, C, D, E** in a randomized (shuffled) order — do not preserve dispatch order. Keep a private A–E → role mapping in your head; do NOT reveal it until after the chairman's verdict.
+
+Display the 5 normalized, anonymized outputs to the user under a heading `## Anonymized advisor outputs`.
 
 ### Step 3 — Peer review pass
 
-In a single message, make 5 parallel `Agent` calls — one per advisor, again — but this time pass them the anonymized bundle of all 5 responses (including their own, which they won't recognize since it's relabeled) and ask them to peer-review.
+In a single message, make 5 parallel `Agent` calls — one per advisor, again — but this time pass them the **normalized, anonymized** bundle of all 5 responses (including their own, which they won't recognize since it's relabeled AND reformatted) and ask them to peer-review.
 
 Use this prompt for each peer-review call:
 ```
@@ -50,24 +69,28 @@ You are reviewing 5 anonymized analyses of the following decision:
 
 Here are the 5 analyses, labeled A–E:
 
-<full anonymized bundle>
+<full normalized anonymized bundle>
 
 In under 150 words, answer:
 1. Which letter gave the strongest overall answer, and why?
 2. Which letter has the biggest blind spot, and what is it?
 3. What is missing from ALL 5 analyses collectively?
 
+Then end with exactly this line, ranking all five from best to worst:
+FINAL RANKING: <letter> > <letter> > <letter> > <letter> > <letter>
+
 Do not try to identify which advisor wrote which — just reason from the content.
 ```
 
-Display the 5 peer reviews under a heading `## Peer review`.
+Display the 5 peer reviews under a heading `## Peer review`. Below them, tally the five `FINAL RANKING` lines into a simple aggregate (e.g. points: 5 for each 1st-place, 1 for each 5th-place) and show the consensus order under `### Aggregate ranking`.
 
 ### Step 4 — Chairman synthesis
 
 Dispatch the `council-chairman` agent with:
 - The original decision
-- The 5 anonymized analyses (A–E)
+- The 5 normalized anonymized analyses (A–E)
 - The 5 peer-review notes
+- The aggregate ranking from Step 3
 
 Use this prompt:
 ```
@@ -77,11 +100,15 @@ The user's decision:
 
 The 5 anonymized advisor analyses:
 
-<full anonymized bundle>
+<full normalized anonymized bundle>
 
 The 5 peer-review notes:
 
 <full peer-review bundle>
+
+The aggregate peer ranking (best to worst):
+
+<aggregate ranking line>
 
 Produce your final verdict in the format specified in your instructions.
 ```
